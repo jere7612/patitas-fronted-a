@@ -1,14 +1,19 @@
 package pe.edu.cibertec.patitas_frondend_a.controller;
-
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
+import pe.edu.cibertec.patitas_frondend_a.dto.LoginRequestDTO;
+import pe.edu.cibertec.patitas_frondend_a.dto.LoginResponseDTO;
 import pe.edu.cibertec.patitas_frondend_a.viewmodel.LoginModel;
 
 @Controller
 @RequestMapping("/login")
+
 public class LoginController {
+    @Autowired
+    RestTemplate restTemplate;
 
     @GetMapping("/inicio")
     public String inicio(Model model) {
@@ -34,11 +39,36 @@ public class LoginController {
         }
 
         //Invocar servicio de autenticacion
+        try {
 
-        LoginModel loginModel = new LoginModel("00", "", "Jeremias Perez");
-        model.addAttribute("loginModel", loginModel);
-        return "principal";
+            String endpoint = "http://localhost:8081/autenticacion/login";
+            LoginRequestDTO loginRequestDTO = new LoginRequestDTO(tipoDocumento, numeroDocumento, password);
+            LoginResponseDTO loginResponseDTO = restTemplate.postForObject(endpoint, loginRequestDTO, LoginResponseDTO.class);
+
+            if (loginResponseDTO.codigo().equals("00")) {
+
+                LoginModel loginModel = new LoginModel("00", "", loginResponseDTO.nombreUsuario());
+                model.addAttribute("loginModel", loginModel);
+                return "principal";
+
+            }else {
+
+                LoginModel loginModel = new LoginModel("02", "Error: Autenticacion fallida", "");
+                model.addAttribute("loginModel", loginModel);
+                return "inicio";
+
+            }
+
+        } catch(Exception e) {
+
+            LoginModel loginModel = new LoginModel("99", "Error: Ocurrio un problema en la autenticacion", "");
+            model.addAttribute("loginModel", loginModel);
+            System.out.println(e.getMessage());
+            return "inicio";
+
+        }
 
 
     }
+
 }
