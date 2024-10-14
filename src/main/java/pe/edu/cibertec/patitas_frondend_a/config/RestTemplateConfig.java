@@ -11,10 +11,29 @@ import java.time.Duration;
 public class RestTemplateConfig {
 
     @Bean
-    public RestTemplate restTemplate(RestTemplateBuilder builder) {
+    public RestTemplate restTemplateAutenticacion(RestTemplateBuilder builder) {
         return builder
-                .setConnectTimeout(Duration.ofSeconds(30))
+                .rootUri("http://localhost:8081/autenticacion")
+                .setConnectTimeout(Duration.ofSeconds(5))//tiempo de espera maximo para establecer la conexion
+                .setReadTimeout(Duration.ofSeconds(10))// tiempo de espera maximo para recibir la respuesta total
                 .build();
 
     }
-}
+
+    @Bean
+    public RestTemplate restTemplateFinanzas(RestTemplateBuilder builder) {
+        return builder
+                .rootUri("http://localhost:8082/finzas")
+                .setReadTimeout(Duration.ofSeconds(30))
+                .build();
+    }
+
+    @Bean
+    public RestTemplate restTemplateReporteria(RestTemplateBuilder builder) {
+        return builder
+                .rootUri("http://localhost:8083/repositorias")
+                .setReadTimeout(Duration.ofSeconds(60))
+                .build();
+    }
+
+    }
